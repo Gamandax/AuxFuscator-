@@ -302,14 +302,18 @@ function Compiler:compile(ast)
         Ast.VariableExpression(self.scope, argVar),
         unpack(util.shuffle(tbl))
     }, Ast.Block({
+    Ast.DoStatement(Ast.Block({
         Ast.AssignmentStatement(assignmentStatLhs, assignmentStatRhs);
-        Ast.ReturnStatement{
-            Ast.FunctionCallExpression(Ast.FunctionCallExpression(Ast.VariableExpression(self.scope, self.createVarargClosureVar), {
-                    Ast.NumberExpression(self.startBlockId);
-                    Ast.TableConstructorExpression(upvalEntries);
-                }), {Ast.FunctionCallExpression(Ast.VariableExpression(self.scope, self.unpackVar), {Ast.VariableExpression(self.scope, argVar)})});
-        }
-    }, self.scope));
+        Ast.DoStatement(Ast.Block({
+            Ast.ReturnStatement{
+                Ast.FunctionCallExpression(Ast.FunctionCallExpression(Ast.VariableExpression(self.scope, self.createVarargClosureVar), {
+                        Ast.NumberExpression(self.startBlockId);
+                        Ast.TableConstructorExpression(upvalEntries);
+                    }), {Ast.FunctionCallExpression(Ast.VariableExpression(self.scope, self.unpackVar), {Ast.VariableExpression(self.scope, argVar)})});
+            }
+        }, Scope:new(self.scope)));
+    }, Scope:new(self.scope)));
+}, self.scope));
 
     return Ast.TopNode(Ast.Block({
         Ast.ReturnStatement{Ast.FunctionCallExpression(functionNode, {
