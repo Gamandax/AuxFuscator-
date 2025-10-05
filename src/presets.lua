@@ -28,7 +28,7 @@ return {
                 Name = "ConstantArray";
                 Settings = {
                     Treshold    = 1;
-                    StringsOnly = false;
+                    StringsOnly = true;
                 }
             },
             {
