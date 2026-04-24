@@ -4,6 +4,12 @@
 --
 -- This Script Provides some configuration presets
 
+-- This Script is Part of the Prometheus and AuxFuscator by Levno_710 and Aux
+--
+-- pipeline.lua
+--
+-- This Script Provides some configuration presets
+
 return {
     ["Weak"] = {
         -- The default LuaVersion is Lua51
@@ -19,17 +25,17 @@ return {
         -- Obfuscation steps
         Steps = {
             {
-                Name = "Vmify";
-                Settings = {
-                    
-                };
-            },
-            {
                 Name = "ConstantArray";
                 Settings = {
                     Treshold    = 1;
                     StringsOnly = true;
                 }
+            },
+            {
+                Name = "Vmify";
+                Settings = {
+
+                };
             },
             {
                 Name = "WrapInFunction";
