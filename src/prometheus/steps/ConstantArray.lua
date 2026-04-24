@@ -203,7 +203,6 @@ function ConstantArray:addRotateCode(ast, shift)
 		end
 	end)
 
-	-- Collect into pending list instead of inserting at top
 	table.insert(self.pendingHeaderStatements, 1, forStat);
 end
 
@@ -252,7 +251,6 @@ function ConstantArray:addDecodeCode(ast)
 			end
 		end)
 	
-		-- Collect into pending list instead of inserting at top
 		table.insert(self.pendingHeaderStatements, 1, forStat);
 	end
 end
@@ -288,7 +286,7 @@ end
 function ConstantArray:apply(ast, pipeline)
 	self.rootScope = ast.body.scope;
 	self.arrId     = self.rootScope:addVariable();
-	self.pendingHeaderStatements = {}; -- Collected statements to insert at the middle
+	self.pendingHeaderStatements = {};
 
 	self.base64chars = table.concat(util.shuffle{
 		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
@@ -486,35 +484,10 @@ function ConstantArray:apply(ast, pipeline)
 	-- Add the Array Declaration into pending list first
 	table.insert(self.pendingHeaderStatements, 1, Ast.LocalVariableDeclaration(self.rootScope, {self.arrId}, {self:createArray()}));
 
-	-- Recursively find the block with the most statements in the entire AST.
-	-- This is necessary because Vmify restructures the script into a deep nested VM,
-	-- so ast.body.statements has very few top-level entries. We find the largest
-	-- block and insert our constants in the true middle of it.
-	local function findLargestBlock(node, best)
-		if node == nil then return best end
-		if node.kind == AstKind.Block then
-			if best == nil or #node.statements > #best.statements then
-				best = node;
-			end
-		end
-		for k, v in pairs(node) do
-			if type(v) == "table" and k ~= "scope" and k ~= "parentScope" then
-				if v.kind ~= nil then
-					best = findLargestBlock(v, best);
-				elseif #v > 0 then
-					for _, child in ipairs(v) do
-						if type(child) == "table" and child.kind ~= nil then
-							best = findLargestBlock(child, best);
-						end
-					end
-				end
-			end
-		end
-		return best;
-	end
-
-	local targetBlock = findLargestBlock(ast, nil);
-	local stmts = (targetBlock and targetBlock.statements) or ast.body.statements;
+	-- Insert into the middle of the root-level statements.
+	-- Using ast.body.statements (the outermost block) ensures we never inject
+	-- into the VM's internal dispatch tree when Vmify runs first.
+	local stmts = ast.body.statements;
 	local midPos = math.floor(#stmts / 2);
 	for i = #self.pendingHeaderStatements, 1, -1 do
 		table.insert(stmts, midPos + 1, self.pendingHeaderStatements[i]);
